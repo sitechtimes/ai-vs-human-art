@@ -1,14 +1,12 @@
+const express = require("express");
 const mongoose = require("mongoose");
-
-// main().catch((err) => console.log(err));
-
-async function connect() {
-  try {
-    await mongoose.connect(process.env.DATABASE_URI, {
-      useUnifiedTopology: true,
-      useNewUrlParser: true, // no discrepancy errors
-    });
-  } catch (error) {
-    console.log(error);
-  }
-}
+const app = express();
+const PORT = process.env.PORT || 3000;
+mongoose
+  .connect(process.env.DATABASE_URI, {})
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+  });

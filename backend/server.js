@@ -1,4 +1,6 @@
 require("dotenv").config();
+require("./config/database");
+const { MongoClient } = require("mongodb").MongoClient;
 const express = require("express");
 const app = express();
 const PORT = 3000;
@@ -9,34 +11,53 @@ const connectDB = require("./config/database");
 const credentials = require("./middleware/credentials");
 const cors = require("cors");
 const errorHandler = require("./middleware/error_handler");
+const itemController = require("./controllers/itemController");
+const artModel = require("./models/artModel");
 /* cors, cookieparser */
+
+app.use("/gallery", itemController);
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 app.use(express.json());
-// cookie middleware
-app.use(cookieParser());
-// static files
-// app.use("/static", express.static(path.join(__dirname, "public")));
-// error handler (very basic)
-app.use(errorHandler);
-// authenticated routes
-app.use("/api/auth", require("./routes/api/auth"));
-// default false endpoint rerouter
+app.use(cookieParser()); // cookie middleware
+app.use(errorHandler); // error handler (very basic)
+app.use("/api/auth", require("./routes/api/auth")); // authenticated routes
 app.all("*", (req, res) => {
+  // default false endpoint rerouter
   res.sendStatus(404);
 });
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
-
-// only opens database once connection is secure
+mongoose
+  .connect(process.env.DATABASE_URI, {
+    dbName: "mevn_gallery",
+  })
+  .then(() => {
+    console.log("Connected to Database");
+  })
+  .catch((err) => {
+    console.log("Not Connected to Database ERROR! ", err);
+  });
+mongoose.connection.on(
+  // only opens database once connection is secure
+  "error",
+  console.error.bind(console, "MongoDB connection error:")
+);
 mongoose.connection.once("open", () => {
   console.log("Mongoose is connected");
   app.listen(PORT, () => {
     console.log(`App is listening at http://localhost:${PORT}`);
+    console.log(Object.keys(mongoose.connection.collections));
   });
+  artModel
+    .find()
+    .lean()
+    .exec()
+    .then((result) => {
+      console.log(result);
+    });
 });
-
 /*
 express js notes
 req (request) = object containing HTTP request info
