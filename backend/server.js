@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 const corsOptions = require("./config/cors");
 const connectDB = require("./config/database");
 const credentials = require("./middleware/credentials");
+const cors = require("cors");
 const errorHandler = require("./middleware/error_handler");
 /* cors, cookieparser */
 app.get("/", (req, res) => {
@@ -16,7 +17,7 @@ app.use(express.json());
 // cookie middleware
 app.use(cookieParser());
 // static files
-app.use("/static", express.static(path.join(__dirname, "public")));
+// app.use("/static", express.static(path.join(__dirname, "public")));
 // error handler (very basic)
 app.use(errorHandler);
 // authenticated routes
@@ -27,6 +28,7 @@ app.all("*", (req, res) => {
 });
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
+
 // only opens database once connection is secure
 mongoose.connection.once("open", () => {
   console.log("Mongoose is connected");
