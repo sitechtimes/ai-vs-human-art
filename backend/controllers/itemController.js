@@ -4,8 +4,14 @@ const Art = require("../models/artModel");
 
 router.get("/gallery", async (req, res) => {
   try {
-    const piecesofart = await Art.find();
-    res.json(piecesofart);
+    artModel
+      .find()
+      .lean()
+      .exec()
+      .then((result) => {
+        const artDict = result;
+      });
+    res.json(result);
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }

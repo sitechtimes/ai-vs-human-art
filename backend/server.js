@@ -3,7 +3,7 @@ require("./config/database");
 const { MongoClient } = require("mongodb").MongoClient;
 const express = require("express");
 const app = express();
-const PORT = 3000;
+const ports = process.env.PORT || 3000;
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const corsOptions = require("./config/cors");
@@ -13,11 +13,20 @@ const cors = require("cors");
 const errorHandler = require("./middleware/error_handler");
 const itemController = require("./controllers/itemController");
 const artModel = require("./models/artModel");
-/* cors, cookieparser */
+/* cors, cookieparser, other imports */
 
 app.use("/gallery", itemController);
 app.get("/", (req, res) => {
   res.send("Hello World");
+});
+app.get("/gallery", (req, res) => {
+  artModel
+    .find()
+    .lean()
+    .exec()
+    .then((result) => {
+      res.send(result);
+    });
 });
 app.use(express.json());
 app.use(cookieParser()); // cookie middleware
@@ -39,6 +48,7 @@ mongoose
   .catch((err) => {
     console.log("Not Connected to Database ERROR! ", err);
   });
+
 mongoose.connection.on(
   // only opens database once connection is secure
   "error",
@@ -46,16 +56,18 @@ mongoose.connection.on(
 );
 mongoose.connection.once("open", () => {
   console.log("Mongoose is connected");
-  app.listen(PORT, () => {
-    console.log(`App is listening at http://localhost:${PORT}`);
+  app.listen(ports, () => {
+    console.log(`App is listening at http://localhost:${ports}`);
     console.log(Object.keys(mongoose.connection.collections));
   });
+  let artDict = [];
   artModel
     .find()
     .lean()
     .exec()
     .then((result) => {
-      console.log(result);
+      let artDict = result;
+      console.log(artDict);
     });
 });
 /*
