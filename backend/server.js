@@ -13,13 +13,14 @@ const cors = require("cors");
 const errorHandler = require("./middleware/error_handler");
 const itemController = require("./controllers/itemController");
 const artModel = require("./models/artModel");
+const galleryRoute = require("./routes/api/gallery");
 /* cors, cookieparser, other imports */
 
-app.use("/gallery", itemController);
+app.use("/api/gallery", galleryRoute);
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
-app.get("/gallery", (req, res) => {
+/* app.get("/gallery", (req, res) => {
   artModel
     .find()
     .lean()
@@ -27,7 +28,7 @@ app.get("/gallery", (req, res) => {
     .then((result) => {
       res.send(result);
     });
-});
+}); */
 app.use(express.json());
 app.use(cookieParser()); // cookie middleware
 app.use(errorHandler); // error handler (very basic)
